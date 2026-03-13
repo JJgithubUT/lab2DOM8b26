@@ -37,4 +37,35 @@ function renderThumbs() {
 
 };
 
+function renderHero(index) {
+  const item = data[index];
+  
+  // Actualizar la imagen principal
+  heroImg.src = item.src;
+  heroImg.alt = item.title;
+
+  // Actualizar el título y la descripción
+  heroTitle.textContent = item.title;
+  heroDesc.textContent = item.desc;
+
+  // Actualizar el contador
+  counter.textContent = `${index + 1} / ${data.lenght}`;
+
+  // Marcar imagen seleccionada de las miniaturas
+  $$(".thumb").forEach((thumb, i) => {
+    thumb.classList.toggle("active", i === index);
+  });
+
+  // ver si la img actual posee un pedazo de like
+  const isLiked = likes[item.id] === true;
+
+  // Cambiar el simbolo del botón
+  likeBtn.textContent = isLiked ? "💗" : "🤍";
+
+  // Aplicar o quitar la clase visual
+  likeBtn.classList.toggle("on", isLiked);
+
+  // Actualizar .......................
+}
+
 renderThumbs();
