@@ -10,10 +10,16 @@ const heroDesc = $('#heroDesc');
 const counter = $('#counter');
 const likeBtn = $('#likeBtn');
 
+const prevBtn = $('#prevBtn'); // Boton de "anterior"
+const nextBtn = $('#nextBtn'); // Boton de "siguiente"
+const playBtn = $('#playBtn'); // Boton de "reproducir"
+
 // Trabajar con el estado de la aplicación
 let currentIndex = 0; // Indice de la imagen actual
 const likes = {}; // Objeto, almacena "me gusta" x c/img
-let autoplayId = null;
+let autoplayId = null; // Variable para almacenar el ID del intervalo de autoplay
+let isPlaying = false; // Estado de reprodicción automática
+const AUTOTIME = 1500; 
 
 // Renderizar las miniaturas
 function renderThumbs() {
@@ -90,6 +96,12 @@ likeBtn.addEventListener("click", () => {
   likeBtn.classList.toggle("on", isLiked); // Aplicar o quitar la clase visual
   likeBtn.setAttribute("aria-pressed", isLiked); // Actualizar el atributo ARIA-PRESSED
 });
+
+// ACtualizar el play button a pause
+function updatePlayButton () {
+  playBtn.textContent = isPlaying ? "⏸️" : "▶️";
+  playBtn.dataset.state = isPlaying ? "pause" : "play";
+};
 
 renderThumbs(); // Llamar a la función para mostrar las miniaturas
 renderHero(currentIndex); // Mostrar imagen inicial
