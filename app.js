@@ -79,5 +79,17 @@ thumbs.addEventListener("click", (e) => {
   renderHero(currentIndex);
 });
 
+// Listener para el botón de "me gusta"
+likeBtn.addEventListener("click", () => {
+  const currentItem = data[currentIndex];
+  // Alternar el edo. de 👍
+  likes[currentItem.id] = !likes[currentItem.id];
+  
+  const isLiked = likes[currentItem.id]; // Verificar nuevo edo.
+  likeBtn.textContent = isLiked ? "💗" : "🤍";
+  likeBtn.classList.toggle("on", isLiked); // Aplicar o quitar la clase visual
+  likeBtn.setAttribute("aria-pressed", isLiked); // Actualizar el atributo ARIA-PRESSED
+});
+
 renderThumbs(); // Llamar a la función para mostrar las miniaturas
 renderHero(currentIndex); // Mostrar imagen inicial
