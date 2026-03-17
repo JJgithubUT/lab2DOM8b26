@@ -66,6 +66,18 @@ function renderHero(index) {
   likeBtn.classList.toggle("on", isLiked);
 
   // Actualizar .......................
+
+
 }
 
-renderThumbs();
+// Manejar para clicks en las miniaturas
+thumbs.addEventListener("click", (e) => {
+  const thumb = e.target.closest(".thumb");
+  if (!thumb) return; // Si no se hizo click en una miniiatura, salir
+  const index = parseInt(thumb.dataset.index); // Actualizar el index actual
+  currentIndex = Number(thumb.dataset.index); // Renderizar la img principal con nuevo index
+  renderHero(currentIndex);
+});
+
+renderThumbs(); // Llamar a la función para mostrar las miniaturas
+renderHero(currentIndex); // Mostrar imagen inicial
