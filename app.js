@@ -19,7 +19,7 @@ let currentIndex = 0; // Indice de la imagen actual
 const likes = {}; // Objeto, almacena "me gusta" x c/img
 let autoplayId = null; // Variable para almacenar el ID del intervalo de autoplay
 let isPlaying = false; // Estado de reprodicción automática
-const AUTOTIME = 1500; 
+const AUTO_TIME = 5000; // 5 segundos para la siguiente carga de las imagenes 
 
 // Renderizar las miniaturas
 function renderThumbs() {
@@ -102,6 +102,61 @@ function updatePlayButton () {
   playBtn.textContent = isPlaying ? "⏸️" : "▶️";
   playBtn.dataset.state = isPlaying ? "pause" : "play";
 };
+
+// Cambiar las imagenes automáticamente
+function changeSlide(newIndex) {
+  heroImg.classList.add("fade-out"); // Agregar clase p. animar de la img
+  setTimeout(() => {
+    currentIndex = newIndex; // Actualizar el indice actual
+    renderHero(currentIndex); // Renderizar la nueva imagen principal
+    heroImg.classList.remove("fade-out"); // Quitar clase para animación de img
+  },350);
+}
+
+function nextSlide() {
+  const newIndex = (currentIndex + 1) % data.lenght; // Calcular el indice de la next img
+  changeSlide(newIndex);
+}
+
+function prevSlide() {
+  const newIndex = (currentIndex - 1) % data.lenght; // Calcular el indice de la prev img
+  changeSlide(newIndex);
+}
+
+function startAutoPlay() {
+  autoplayId = setInterval(() => {
+    nextSlide();
+  }, AUTO_TIME);
+  isPlaying = true;
+  updatePlayButton();
+}
+
+function stopAutoPlay() {
+  clearInterval(autoplayId);
+  autoplayId = null;
+  isPlaying = false;
+  updatePlayButton();
+}
+
+function toggleAutoPlay () {
+  if (isPlaying) {
+    stopAutoPlay();
+  } else {
+    startAutoPlay();
+  }
+}
+
+nextBtn.addEventListener("click", nextSlide);
+prevBtn.addEventListener("click", prevSlide);
+playBtn.addEventListener("click", toggleAutoPlay);
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") {
+    nextSlide();
+  } else if (e.key === "ArrowLeft") {
+    prevSlide();
+  }
+});
 
 renderThumbs(); // Llamar a la función para mostrar las miniaturas
 renderHero(currentIndex); // Mostrar imagen inicial
