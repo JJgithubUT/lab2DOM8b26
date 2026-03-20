@@ -1,5 +1,6 @@
+// app.js
 'use strict';
-import { data } from './data-in-js';
+import data from './data-in-js.js';
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
@@ -69,11 +70,11 @@ function createDots() {
 
   dots.innerHTML = data.map((_, index) => {
     return `
-      <button>
-        class="dot ${index === currentIndex ?? "active"}"
-        type="button"
-        data-index="${index}"
-        aria-label="Ir a la imagen ${index + 1}"
+      <button 
+        class="dot ${index === currentIndex ? "active" : ""}" 
+        type="button" 
+        data-index="${index}" 
+        aria-label="Ir a la imagen ${index + 1}">
       </button>
     `;
   }).join("");
@@ -87,7 +88,7 @@ function renderThumbs() {
     return `
       <article class="thumb" ${index === currentIndex ? "active" : ""} data-index="${index}">
         <span class="badge">${index + 1}</span>
-        <img src="${item.src} alt="${item.title}" />
+        <img src="${item.src}" alt="${item.title}" />
       </article>
     `;
   }).join("");
@@ -115,7 +116,7 @@ function renderHero(index) {
   heroDesc.textContent = item.desc;
 
   // Actualizar el contador
-  counter.textContent = `${index + 1} / ${data.lenght}`;
+  counter.textContent = `${index + 1} / ${data.length}`;
 
   // Marcar imagen seleccionada de las miniaturas
   $$(".thumb").forEach((thumb, i) => {
@@ -174,12 +175,12 @@ function changeSlide(newIndex) {
 }
 
 function nextSlide() {
-  const newIndex = (currentIndex + 1) % data.lenght; // Calcular el indice de la next img
+  const newIndex = (currentIndex + 1) % data.length; // Calcular el indice de la next img
   changeSlide(newIndex);
 }
 
 function prevSlide() {
-  const newIndex = (currentIndex - 1) % data.lenght; // Calcular el indice de la prev img
+  const newIndex = (currentIndex - 1 + data.length) % data.length; // Calcular el indice de la prev img
   changeSlide(newIndex);
 }
 

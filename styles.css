@@ -1,3 +1,5 @@
+/* styles.css */
+
 :root {
   --bg: #0b1220;
   --card: #121b2e;
@@ -93,7 +95,7 @@ body {
   background: rgba(18, 27, 46, .85);
   color: var(--text);
   padding: 10px 12px;
-  border: radius 12px;
+  border-radius: 12px;
   cursor: pointer;
 }
 
