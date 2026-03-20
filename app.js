@@ -3,6 +3,8 @@ import { data } from './data-in-js';
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+// Recuperar elementos de DOM
+const frame = $(".frame");
 const thumbs = $('#thumbs');
 const heroImg = $('#heroImg');
 const heroTitle = $('#heroTitle');
@@ -20,6 +22,64 @@ const likes = {}; // Objeto, almacena "me gusta" x c/img
 let autoplayId = null; // Variable para almacenar el ID del intervalo de autoplay
 let isPlaying = false; // Estado de reprodicción automática
 const AUTO_TIME = 5000; // 5 segundos para la siguiente carga de las imagenes 
+
+// Elementos a agregar en el DOM actual
+// Se buscan y si no hay se crearán con JS
+let dots = $("#dots");
+let track = $(".track");
+
+// Variables p. detectar swipe (deslizamiento)
+let startX = 0; // Valor inicial de X
+let currentX = 0; // Valor actual de X
+let isDragging = false;
+let moved = false;
+
+// distancia mínima para considerar swipe
+const SWIPE_THRESHOLD = 50;
+
+// Crear un track del carrusel
+// CRea un contenedor .track que tendrá
+// todas las imgs  alineadas horizontalmente
+// Es la base del efecto slide con translateX
+function createTrack() {
+  // Si existe no hacer nada
+  if (track) return;
+  // Si no existe, crear
+  track = document.createElement("div");
+  track.className = "track";
+  data.forEach((item) => {
+    const img = document.createElement("img");
+    img.src = item.src;
+    img.alt = item.title;
+    track.appendChild(img);
+  });
+}
+
+// Crear dots
+// Crear los botones indicadores del carrusel
+// Cada dot representará una img
+// El dot activo debe coincidir con currentIndex
+function createDots() {
+  if (!dots) {
+    dots = document.createElement("div");
+    dots.id = "dots";
+    dots.className = "dots";
+    frame.appendChild(dots);
+  }
+
+  dots.innerHTML = data.map((_, index) => {
+    return `
+      <button>
+        class="dot ${index === currentIndex ?? "active"}"
+        type="button"
+        data-index="${index}"
+        aria-label="Ir a la imagen ${index + 1}"
+      </button>
+    `;
+  }).join("");
+
+}
+
 
 // Renderizar las miniaturas
 function renderThumbs() {
