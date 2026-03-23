@@ -38,6 +38,20 @@ let moved = false;
 // distancia mínima para considerar swipe
 const SWIPE_THRESHOLD = 50;
 
+// Para usar el modal
+let modal = null;
+let modalImg = null;
+let modalTitle = null;
+let modalDesc = null;
+let modalCounter = null;
+let modalPrevBtn = null;
+let modalNextBtn = null;
+let modalCloseBtn = null;
+let zoomInBtn = null;
+let zoomOutBtn = null;
+let zoomResetBtn = null;
+let modalScale = null;
+
 // Crear un track del carrusel
 // CRea un contenedor .track que tendrá
 // todas las imgs  alineadas horizontalmente
@@ -81,6 +95,40 @@ function createDots() {
 
 }
 
+// Crear la función que actualiza el track
+function updateTrack() {
+  if (!track) return;
+  track.style.transition = animate ? "transform .45s ease" : "none";
+  track.style.transform = `translateX(-${currentIndex * 100}%)`;
+}
+
+function updateMeta() {
+  const item = data[currentIndex];
+  heroTitle.textContent = item.title;
+  heroDesc.textContent = item.desc;
+  counter.textContent = `${currentIndex + 1} / ${data.length}`;
+}
+
+function updateThumbs() {
+  $$(".thumb").forEach((thumb, index) => {
+    thumb.classList.toggle("active", index === currentIndex);
+  });
+}
+
+function updateDots() {
+  $$(".dot").forEach((dot, index) => {
+    dot.classList.toggle("active", index === currentIndex);
+    dot.setAttribute.toggle("aria-pressed", index === currentIndex);
+  });
+}
+
+function updateLikeBtn() {
+  const currentItem = data[currentIndex]; // Item actual
+  const isLiked = likes[currentItem.id]; // Verificar nuevo edo.
+  likeBtn.textContent = isLiked ? "💗" : "🤍";
+  likeBtn.classList.toggle("on", isLiked); // Aplicar o quitar la clase visual
+  likeBtn.setAttribute("aria-pressed", isLiked); // Actualizar el atributo ARIA-PRESSED
+}
 
 // Renderizar las miniaturas
 function renderThumbs() {
@@ -151,11 +199,7 @@ likeBtn.addEventListener("click", () => {
   const currentItem = data[currentIndex];
   // Alternar el edo. de 👍
   likes[currentItem.id] = !likes[currentItem.id];
-  
-  const isLiked = likes[currentItem.id]; // Verificar nuevo edo.
-  likeBtn.textContent = isLiked ? "💗" : "🤍";
-  likeBtn.classList.toggle("on", isLiked); // Aplicar o quitar la clase visual
-  likeBtn.setAttribute("aria-pressed", isLiked); // Actualizar el atributo ARIA-PRESSED
+  updateLikeBtn();
 });
 
 // ACtualizar el play button a pause
@@ -205,6 +249,14 @@ function toggleAutoPlay () {
   } else {
     startAutoPlay();
   }
+}
+
+function renderAll(animate = true) {
+  updateTrack(animate);
+  updateMeta();
+  updateThumbs();
+  updateDots();
+  updateLikeBtn();
 }
 
 nextBtn.addEventListener("click", nextSlide);
