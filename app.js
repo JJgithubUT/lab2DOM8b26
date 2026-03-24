@@ -259,6 +259,66 @@ function renderAll(animate = true) {
   updateLikeBtn();
 }
 
+// Animación pop del like
+// Agrega o elimina la clase pop para reiniciar la animación CSS al dar click
+function animateLikePop() {
+  likeBtn.classList.remove("pop");
+  void likeBtn.offsetWidth;
+  likeBtn.classList.add("pop");
+}
+
+// Manejo de SWIPE - inicio
+// Registra la posición inicial dle puntero y
+// desactiva temporalmente la transición
+function handlePointDown() {
+  startX = e.clientX;
+  currentX = e.clientX;
+  isDragging = true;
+  moved = false;
+
+  if (track) {
+    track.style.transition = "none";
+  }
+}
+
+// Manejo de SWIPE - movimiento
+// Actualiza la posición del puntero
+// si el movimiento supera 5px, se considera arrastre
+function handlerPointerMove(e) {
+  if (!isDragging) return;
+
+  currentX = e.clientX;
+  const diff = currentX - startX;
+
+  if (Math.abs(diff) > 5) {
+    moved = true;
+  }
+}
+
+// Manejo de SWIPE - FIN
+// Al soltar el mouse, se calcula la distancia recorrida
+// Si supera el umbral, cambia la img
+// Si no, solo regresa el track a su sitio
+function handlePointerUp() {
+  const diff = currentX - startX;
+  isDragging = false;
+  if (Math.abs(diff) >= SWIPE_THRESHOLD) {
+    if (diff < 0) {
+      nextSlide();
+    } else {
+      prevSlide();
+    }
+  } else {
+    updateTrack(true);
+  }
+}
+
+// Eventos de SWIPE con el mouse
+frame.addEventListener("pointerdown", handlePointDown);
+frame.addEventListener("pointermove", handlerPointerMove);
+frame.addEventListener("pointerdown", handlePointerUp);
+frame.addEventListener("pointerleave", handlePointerUp);
+
 nextBtn.addEventListener("click", nextSlide);
 prevBtn.addEventListener("click", prevSlide);
 playBtn.addEventListener("click", toggleAutoPlay);
