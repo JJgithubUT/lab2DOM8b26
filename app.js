@@ -13,53 +13,30 @@ const heroDesc = $('#heroDesc');
 const counter = $('#counter');
 const likeBtn = $('#likeBtn');
 
-const prevBtn = $('#prevBtn'); // Boton de "anterior"
-const nextBtn = $('#nextBtn'); // Boton de "siguiente"
-const playBtn = $('#playBtn'); // Boton de "reproducir"
+const prevBtn = $('#prevBtn');
+const nextBtn = $('#nextBtn');
+const playBtn = $('#playBtn');
 
-// Trabajar con el estado de la aplicación
-let currentIndex = 0; // Indice de la imagen actual
-const likes = {}; // Objeto, almacena "me gusta" x c/img
-let autoplayId = null; // Variable para almacenar el ID del intervalo de autoplay
-let isPlaying = false; // Estado de reprodicción automática
-const AUTO_TIME = 5000; // 5 segundos para la siguiente carga de las imagenes 
+// Estado de la aplicación
+let currentIndex = 0;
+const likes = {};
+let autoplayId = null;
+let isPlaying = false;
+const AUTO_TIME = 5000;
 
-// Elementos a agregar en el DOM actual
-// Se buscan y si no hay se crearán con JS
 let dots = $("#dots");
 let track = $(".track");
 
-// Variables p. detectar swipe (deslizamiento)
-let startX = 0; // Valor inicial de X
-let currentX = 0; // Valor actual de X
+// Variables para swipe
+let startX = 0;
+let currentX = 0;
 let isDragging = false;
 let moved = false;
-
-// distancia mínima para considerar swipe
 const SWIPE_THRESHOLD = 50;
 
-// Para usar el modal
-let modal = null;
-let modalImg = null;
-let modalTitle = null;
-let modalDesc = null;
-let modalCounter = null;
-let modalPrevBtn = null;
-let modalNextBtn = null;
-let modalCloseBtn = null;
-let zoomInBtn = null;
-let zoomOutBtn = null;
-let zoomResetBtn = null;
-let modalScale = null;
-
-// Crear un track del carrusel
-// CRea un contenedor .track que tendrá
-// todas las imgs  alineadas horizontalmente
-// Es la base del efecto slide con translateX
+// ── TRACK ────────────────────────────────────────────────
 function createTrack() {
-  // Si existe no hacer nada
   if (track) return;
-  // Si no existe, crear
   track = document.createElement("div");
   track.className = "track";
   data.forEach((item) => {
@@ -70,10 +47,7 @@ function createTrack() {
   });
 }
 
-// Crear dots
-// Crear los botones indicadores del carrusel
-// Cada dot representará una img
-// El dot activo debe coincidir con currentIndex
+// ── DOTS ─────────────────────────────────────────────────
 function createDots() {
   if (!dots) {
     dots = document.createElement("div");
@@ -81,22 +55,19 @@ function createDots() {
     dots.className = "dots";
     frame.appendChild(dots);
   }
-
-  dots.innerHTML = data.map((_, index) => {
-    return `
-      <button 
-        class="dot ${index === currentIndex ? "active" : ""}" 
-        type="button" 
-        data-index="${index}" 
-        aria-label="Ir a la imagen ${index + 1}">
-      </button>
-    `;
-  }).join("");
-
+  dots.innerHTML = data.map((_, index) => `
+    <button 
+      class="dot ${index === currentIndex ? "active" : ""}" 
+      type="button" 
+      data-index="${index}" 
+      aria-label="Ir a la imagen ${index + 1}">
+    </button>
+  `).join("");
 }
 
-// Crear la función que actualiza el track
-function updateTrack() {
+// ── UPDATE HELPERS ────────────────────────────────────────
+// FIX: animate ahora es parámetro con valor por defecto
+function updateTrack(animate = true) {
   if (!track) return;
   track.style.transition = animate ? "transform .45s ease" : "none";
   track.style.transform = `translateX(-${currentIndex * 100}%)`;
@@ -118,120 +89,144 @@ function updateThumbs() {
 function updateDots() {
   $$(".dot").forEach((dot, index) => {
     dot.classList.toggle("active", index === currentIndex);
-    dot.setAttribute.toggle("aria-pressed", index === currentIndex);
+    // FIX: setAttribute.toggle no existe — usar setAttribute directamente
+    dot.setAttribute("aria-pressed", index === currentIndex);
   });
 }
 
 function updateLikeBtn() {
-  const currentItem = data[currentIndex]; // Item actual
-  const isLiked = likes[currentItem.id]; // Verificar nuevo edo.
+  const currentItem = data[currentIndex];
+  const isLiked = likes[currentItem.id];
   likeBtn.textContent = isLiked ? "💗" : "🤍";
-  likeBtn.classList.toggle("on", isLiked); // Aplicar o quitar la clase visual
-  likeBtn.setAttribute("aria-pressed", isLiked); // Actualizar el atributo ARIA-PRESSED
+  likeBtn.classList.toggle("on", isLiked);
+  likeBtn.setAttribute("aria-pressed", String(Boolean(isLiked)));
 }
 
-// Renderizar las miniaturas
-function renderThumbs() {
-  thumbs.innerHTML = data.map((item, index) => {
-    return `
-      <article class="thumb" ${index === currentIndex ? "active" : ""} data-index="${index}">
-        <span class="badge">${index + 1}</span>
-        <img src="${item.src}" alt="${item.title}" />
-      </article>
-    `;
-  }).join("");
+// ── RENDER HERO ───────────────────────────────────────────
+// FIX: ya no recibe index — usa currentIndex directamente
+function renderHero() {
+  const item = data[currentIndex];
 
-  // Añadir eventos a cada miniatura
+  heroImg.src = item.src;
+  heroImg.alt = item.title;
+  heroTitle.textContent = item.title;
+  heroDesc.textContent = item.desc;
+  counter.textContent = `${currentIndex + 1} / ${data.length}`;
+
+  $$(".thumb").forEach((thumb, i) => {
+    thumb.classList.toggle("active", i === currentIndex);
+  });
+
+  const isLiked = likes[item.id] === true;
+  likeBtn.textContent = isLiked ? "💗" : "🤍";
+  likeBtn.classList.toggle("on", isLiked);
+  likeBtn.setAttribute("aria-pressed", String(isLiked));
+}
+
+// ── THUMBS ────────────────────────────────────────────────
+function renderThumbs() {
+  thumbs.innerHTML = data.map((item, index) => `
+    <article class="thumb ${index === currentIndex ? "active" : ""}" data-index="${index}">
+      <span class="badge">${index + 1}</span>
+      <img src="${item.src}" alt="${item.title}" />
+    </article>
+  `).join("");
+
   $$('.thumb', thumbs).forEach(el => {
     el.addEventListener('click', () => {
       currentIndex = parseInt(el.dataset.index, 10);
-      renderHero();
-      renderThumbs();
+      updateAllVisuals();
     });
   });
+}
 
-};
+// ── CARROUSEL (píldora) ───────────────────────────────────
+const carrousel = $("#carrousel");
 
-function renderHero(index) {
-  const item = data[index];
-  
-  // Actualizar la imagen principal
-  heroImg.src = item.src;
-  heroImg.alt = item.title;
+// FIX: definir la función ANTES de llamarla
+function createCarrouselElements() {
+  carrousel.innerHTML = data.map((item, index) => {
+    const estado = index === currentIndex ? 'activated' : 'unactivated';
+    return `<button class="horse ${estado}" totheid="${index}">${index + 1}</button>`;
+  }).join("");
 
-  // Actualizar el título y la descripción
-  heroTitle.textContent = item.title;
-  heroDesc.textContent = item.desc;
+  $$('.horse').forEach(el => {
+    el.addEventListener('click', () => {
+      currentIndex = parseInt(el.getAttribute("totheid"));
+      updateAllVisuals();
+    });
+  });
+}
 
-  // Actualizar el contador
-  counter.textContent = `${index + 1} / ${data.length}`;
+function updateCarrouselElements() {
+  $$('.horse').forEach((el, i) => {
+    el.className = `horse ${i === currentIndex ? 'activated' : 'unactivated'}`;
+  });
+}
 
-  // Marcar imagen seleccionada de las miniaturas
-  $$(".thumb").forEach((thumb, i) => {
-    thumb.classList.toggle("active", i === index);
+// ── SIDE CAROUSEL ─────────────────────────────────────────
+const sideTrack = $('#sideTrack');
+
+function renderSideCarousel() {
+  sideTrack.innerHTML = data.map((item, index) => `
+    <div class="side-item ${index === currentIndex ? "active" : ""}" 
+         data-index="${index}" 
+         id="side-item-${index}">
+      <img src="${item.src}" alt="${item.title}" />
+    </div>
+  `).join("");
+
+  $$('.side-item', sideTrack).forEach(el => {
+    el.addEventListener('click', () => {
+      currentIndex = parseInt(el.dataset.index, 10);
+      updateAllVisuals();
+    });
+  });
+}
+
+// ── ACTUALIZAR TODO ───────────────────────────────────────
+function updateAllVisuals() {
+  renderHero();
+  renderThumbs();
+  updateCarrouselElements();
+
+  $$('.side-item').forEach((item, i) => {
+    item.classList.toggle('active', i === currentIndex);
   });
 
-  // ver si la img actual posee un pedazo de like
-  const isLiked = likes[item.id] === true;
-
-  // Cambiar el simbolo del botón
-  likeBtn.textContent = isLiked ? "💗" : "🤍";
-
-  // Aplicar o quitar la clase visual
-  likeBtn.classList.toggle("on", isLiked);
-
-  // Actualizar .......................
-
-
+  const activeSideItem = $(`#side-item-${currentIndex}`);
+  if (activeSideItem) {
+    activeSideItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 }
 
-// Manejar para clicks en las miniaturas
-thumbs.addEventListener("click", (e) => {
-  const thumb = e.target.closest(".thumb");
-  if (!thumb) return; // Si no se hizo click en una miniiatura, salir
-  const index = parseInt(thumb.dataset.index); // Actualizar el index actual
-  currentIndex = Number(thumb.dataset.index); // Renderizar la img principal con nuevo index
-  renderHero(currentIndex);
-});
-
-// Listener para el botón de "me gusta"
-likeBtn.addEventListener("click", () => {
-  const currentItem = data[currentIndex];
-  // Alternar el edo. de 👍
-  likes[currentItem.id] = !likes[currentItem.id];
-  updateLikeBtn();
-});
-
-// ACtualizar el play button a pause
-function updatePlayButton () {
-  playBtn.textContent = isPlaying ? "⏸️" : "▶️";
-  playBtn.dataset.state = isPlaying ? "pause" : "play";
-};
-
-// Cambiar las imagenes automáticamente
+// ── NAVEGACIÓN ────────────────────────────────────────────
 function changeSlide(newIndex) {
-  heroImg.classList.add("fade-out"); // Agregar clase p. animar de la img
+  heroImg.classList.add("fade-out");
   setTimeout(() => {
-    currentIndex = newIndex; // Actualizar el indice actual
-    renderHero(currentIndex); // Renderizar la nueva imagen principal
-    heroImg.classList.remove("fade-out"); // Quitar clase para animación de img
-  },350);
+    currentIndex = newIndex;
+    updateAllVisuals();
+    heroImg.classList.remove("fade-out");
+  }, 350);
 }
 
+// FIX: una sola definición de nextSlide / prevSlide
 function nextSlide() {
-  const newIndex = (currentIndex + 1) % data.length; // Calcular el indice de la next img
-  changeSlide(newIndex);
+  changeSlide((currentIndex + 1) % data.length);
 }
 
 function prevSlide() {
-  const newIndex = (currentIndex - 1 + data.length) % data.length; // Calcular el indice de la prev img
-  changeSlide(newIndex);
+  changeSlide((currentIndex - 1 + data.length) % data.length);
+}
+
+// ── AUTOPLAY ──────────────────────────────────────────────
+function updatePlayButton() {
+  playBtn.textContent = isPlaying ? "⏸️" : "▶️";
+  playBtn.dataset.state = isPlaying ? "pause" : "play";
 }
 
 function startAutoPlay() {
-  autoplayId = setInterval(() => {
-    nextSlide();
-  }, AUTO_TIME);
+  autoplayId = setInterval(nextSlide, AUTO_TIME);
   isPlaying = true;
   updatePlayButton();
 }
@@ -243,142 +238,75 @@ function stopAutoPlay() {
   updatePlayButton();
 }
 
-function toggleAutoPlay () {
-  if (isPlaying) {
-    stopAutoPlay();
-  } else {
-    startAutoPlay();
-  }
+function toggleAutoPlay() {
+  isPlaying ? stopAutoPlay() : startAutoPlay();
 }
 
-function renderAll(animate = true) {
-  updateTrack(animate);
-  updateMeta();
-  updateThumbs();
-  updateDots();
+// ── LIKE ──────────────────────────────────────────────────
+likeBtn.addEventListener("click", () => {
+  const currentItem = data[currentIndex];
+  likes[currentItem.id] = !likes[currentItem.id];
   updateLikeBtn();
-}
+  animateLikePop();
+});
 
-// Animación pop del like
-// Agrega o elimina la clase pop para reiniciar la animación CSS al dar click
 function animateLikePop() {
   likeBtn.classList.remove("pop");
   void likeBtn.offsetWidth;
   likeBtn.classList.add("pop");
 }
 
-// Manejo de SWIPE - inicio
-// Registra la posición inicial dle puntero y
-// desactiva temporalmente la transición
-function handlePointDown() {
+// ── SWIPE ─────────────────────────────────────────────────
+// FIX: faltaba el parámetro (e) en handlePointerDown
+function handlePointerDown(e) {
   startX = e.clientX;
   currentX = e.clientX;
   isDragging = true;
   moved = false;
-
-  if (track) {
-    track.style.transition = "none";
-  }
+  if (track) track.style.transition = "none";
 }
 
-// Manejo de SWIPE - movimiento
-// Actualiza la posición del puntero
-// si el movimiento supera 5px, se considera arrastre
-function handlerPointerMove(e) {
+function handlePointerMove(e) {
   if (!isDragging) return;
-
   currentX = e.clientX;
-  const diff = currentX - startX;
-
-  if (Math.abs(diff) > 5) {
-    moved = true;
-  }
+  if (Math.abs(currentX - startX) > 5) moved = true;
 }
 
-// Manejo de SWIPE - FIN
-// Al soltar el mouse, se calcula la distancia recorrida
-// Si supera el umbral, cambia la img
-// Si no, solo regresa el track a su sitio
 function handlePointerUp() {
   const diff = currentX - startX;
   isDragging = false;
   if (Math.abs(diff) >= SWIPE_THRESHOLD) {
-    if (diff < 0) {
-      nextSlide();
-    } else {
-      prevSlide();
-    }
+    diff < 0 ? nextSlide() : prevSlide();
   } else {
     updateTrack(true);
   }
 }
 
-const carrousel = $("#carrousel");
-// Crear carrousel tipo barra accesible en el meta
-createCarrouselElements(); // nombre correcto
-
-function createCarrouselElements () {
-  carrousel.innerHTML = data.map((item, index) => {
-    let estadoSeleccion = index === currentIndex ? 'activated' : 'unactivated';
-    return `
-      <button class="horse ${estadoSeleccion}" totheid="${index}">${index}</button>
-    `;
-  }).join("");
-
-  $$('.horse').forEach(el => {
-    el.addEventListener('click', () => {
-      currentIndex = parseInt(el.getAttribute("totheid"));
-      renderHero(currentIndex);
-      renderThumbs();
-    });
-  });
-}
-
-/* 
-
-// Renderizar las miniaturas
-function renderThumbs() {
-  thumbs.innerHTML = data.map((item, index) => {
-    return `
-      <article class="thumb" ${index === currentIndex ? "active" : ""} data-index="${index}">
-        <span class="badge">${index + 1}</span>
-        <img src="${item.src}" alt="${item.title}" />
-      </article>
-    `;
-  }).join("");
-
-  // Añadir eventos a cada miniatura
-  $$('.thumb', thumbs).forEach(el => {
-    el.addEventListener('click', () => {
-      currentIndex = parseInt(el.dataset.index, 10);
-      renderHero();
-      renderThumbs();
-    });
-  });
-
-};
-}
- */
-
-// Eventos de SWIPE con el mouse
-frame.addEventListener("pointerdown", handlePointDown);
-frame.addEventListener("pointermove", handlerPointerMove);
-frame.addEventListener("pointerdown", handlePointerUp);
+// ── EVENTOS ───────────────────────────────────────────────
+// FIX: el tercer listener debe ser pointerup, no pointerdown
+frame.addEventListener("pointerdown", handlePointerDown);
+frame.addEventListener("pointermove", handlePointerMove);
+frame.addEventListener("pointerup", handlePointerUp);
 frame.addEventListener("pointerleave", handlePointerUp);
 
 nextBtn.addEventListener("click", nextSlide);
 prevBtn.addEventListener("click", prevSlide);
 playBtn.addEventListener("click", toggleAutoPlay);
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowRight") {
-    nextSlide();
-  } else if (e.key === "ArrowLeft") {
-    prevSlide();
-  }
+thumbs.addEventListener("click", (e) => {
+  const thumb = e.target.closest(".thumb");
+  if (!thumb) return;
+  currentIndex = parseInt(thumb.dataset.index, 10);
+  updateAllVisuals();
 });
 
+document.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowRight") nextSlide();
+  else if (e.key === "ArrowLeft") prevSlide();
+});
 
-updateCarrouselElements(); // Llama a la función para motrar el carrousel
-renderThumbs(); // Llamar a la función para mostrar las miniaturas
-renderHero(currentIndex); // Mostrar imagen inicial
+// ── INICIO ────────────────────────────────────────────────
+createCarrouselElements();  // FIX: nombre correcto, definida antes de llamarse
+renderSideCarousel();
+renderThumbs();
+renderHero();

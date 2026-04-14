@@ -189,3 +189,71 @@ body {
     grid-template-columns: 1fr
   }
 }
+
+/* Layout del visor para admitir el carrusel lateral */
+.viewer-content {
+  display: flex;
+  height: 450px; /* Altura fija para controlar el scroll vertical */
+  background: #060a14;
+}
+
+.side-carousel {
+  width: 120px;
+  border-right: 1px solid var(--line);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
+
+/* Personalización de la barra para Chrome/Edge/Safari */
+.side-carousel::-webkit-scrollbar {
+  width: 4px;
+}
+.side-carousel::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 10px;
+}
+
+.side-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 20px 0;
+}
+
+.side-item {
+  width: 80px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: brightness(0.3) grayscale(0.5); /* Oscuras por defecto */
+  transform: scale(0.8);
+  border: 2px solid transparent;
+}
+
+.side-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Imagen Seleccionada: Brillante, grande y con glow */
+.side-item.active {
+  filter: brightness(1) grayscale(0);
+  transform: scale(1.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(122, 162, 255, 0.4);
+}
+
+/* Ajuste al frame para que ocupe el resto */
+.frame {
+  flex-grow: 1;
+  height: 100%;
+  aspect-ratio: unset; /* Quitamos el aspect ratio fijo para que llene el contenedor */
+}

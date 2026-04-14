@@ -1,12 +1,14 @@
 <!-- index.html -->
 <!doctype html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Galería Dinámica</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
+
 <body>
   <header class="top">
     <h1>Galería Dinámica</h1>
@@ -15,13 +17,22 @@
 
   <main class="layout">
     <section class="viewer" aria-label="Visor principal">
-      <div class="frame">
-        <img id="heroImg" alt="Imagen principal" />
-        <button id="likeBtn" class="like" type="button" aria-pressed="false">♡</button>
-        <div class="controls">
-          <button id="prevBtn" type="button">←</button>
-          <button id="nextBtn" type="button">→</button>
-          <button id="playBtn" type="button">▶</button>
+      <div class="viewer-content">
+
+        <aside class="side-carousel">
+          <div id="sideTrack" class="side-track">
+          </div>
+        </aside>
+
+        <div class="frame">
+          <img id="heroImg" alt="Imagen principal" />
+          <button id="likeBtn" class="like" type="button" aria-pressed="false">♡</button>
+
+          <div class="controls">
+            <button id="prevBtn" type="button">←</button>
+            <button id="nextBtn" type="button">→</button>
+            <button id="playBtn" type="button">▶</button>
+          </div>
         </div>
       </div>
 
@@ -34,7 +45,6 @@
           <span id="counter">0 / 0</span>
         </div>
         <div class="pill" id="carrousel">
-          <button class="horse unactivated">.</button>
         </div>
       </div>
     </section>
@@ -50,4 +60,5 @@
 
   <script type="module" src="app.js"></script>
 </body>
+
 </html>
