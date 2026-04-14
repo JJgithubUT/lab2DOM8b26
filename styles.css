@@ -117,6 +117,23 @@ body {
   padding: 8px 10px
 }
 
+.horse {
+  width: 16px;
+  height: 16px;
+  color: white;
+  background-color: #3d5480;
+  border: none;
+  border-radius: 50%;
+}
+
+.horse .activated {
+  background-color: #5ce1a6;
+}
+
+.horse .unactivated {
+  background-color: #3d5480;
+}
+
 .thumbs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

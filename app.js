@@ -313,6 +313,53 @@ function handlePointerUp() {
   }
 }
 
+const carrousel = $("#carrousel");
+// Crear carrousel tipo barra accesible en el meta
+createCarrouselElements(); // nombre correcto
+
+function createCarrouselElements () {
+  carrousel.innerHTML = data.map((item, index) => {
+    let estadoSeleccion = index === currentIndex ? 'activated' : 'unactivated';
+    return `
+      <button class="horse ${estadoSeleccion}" totheid="${index}">${index}</button>
+    `;
+  }).join("");
+
+  $$('.horse').forEach(el => {
+    el.addEventListener('click', () => {
+      currentIndex = parseInt(el.getAttribute("totheid"));
+      renderHero(currentIndex);
+      renderThumbs();
+    });
+  });
+}
+
+/* 
+
+// Renderizar las miniaturas
+function renderThumbs() {
+  thumbs.innerHTML = data.map((item, index) => {
+    return `
+      <article class="thumb" ${index === currentIndex ? "active" : ""} data-index="${index}">
+        <span class="badge">${index + 1}</span>
+        <img src="${item.src}" alt="${item.title}" />
+      </article>
+    `;
+  }).join("");
+
+  // Añadir eventos a cada miniatura
+  $$('.thumb', thumbs).forEach(el => {
+    el.addEventListener('click', () => {
+      currentIndex = parseInt(el.dataset.index, 10);
+      renderHero();
+      renderThumbs();
+    });
+  });
+
+};
+}
+ */
+
 // Eventos de SWIPE con el mouse
 frame.addEventListener("pointerdown", handlePointDown);
 frame.addEventListener("pointermove", handlerPointerMove);
@@ -331,5 +378,7 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+
+updateCarrouselElements(); // Llama a la función para motrar el carrousel
 renderThumbs(); // Llamar a la función para mostrar las miniaturas
 renderHero(currentIndex); // Mostrar imagen inicial
